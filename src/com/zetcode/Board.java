@@ -1,12 +1,17 @@
 package com.zetcode;
 
+
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Random;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -34,10 +39,17 @@ public class Board extends JPanel {
     private final int BOARD_WIDTH = N_COLS * CELL_SIZE + 1;
     private final int BOARD_HEIGHT = N_ROWS * CELL_SIZE + 1;
 
+    private final int TREASURE_CELL = 8;
+    private int extraLives = 0;
+
+
     private int[] field;
     private boolean inGame;
     private int minesLeft;
-    private Image[] img;
+    private Image[] img; //IMAGES MUST BE 15X15
+    private boolean isPaused = false;
+    private Image pauseImage;
+
 
     private int allCells;
     private final JLabel statusbar;
@@ -52,25 +64,50 @@ public class Board extends JPanel {
 
         setPreferredSize(new Dimension(BOARD_WIDTH, BOARD_HEIGHT));
 
-        img = new Image[NUM_IMAGES];
+        img = new Image[NUM_IMAGES + 1];
 
         for (int i = 0; i < NUM_IMAGES; i++) {
 
-            var path = "src/resources/" + i + ".png";
-            img[i] = (new ImageIcon(path)).getImage();
+            var path = "/resources/" + i + ".png"; // Add leading slash for classpath reference
+        img[i] = new ImageIcon(getClass().getResource(path)).getImage();
+            //LOAD MY IMAGES HERE
         }
+        var treasurePath = "/resources/13.png"; //  13.png is the treasure image
+        img[8] = new ImageIcon(getClass().getResource(treasurePath)).getImage();
+
+
+        var pausePath = "/resources/14.png"; //14.png is the pause image. Press p to pause
+        pauseImage = new ImageIcon(getClass().getResource(pausePath)).getImage();
 
         addMouseListener(new MinesAdapter());
         newGame();
+
+        
+     setFocusable(true);
+    addKeyListener((KeyListener) new KeyAdapter() {
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_P) { // P key to pause/unpause
+            isPaused = !isPaused;
+            repaint();
+        }
+    }
+});
+        
+
+
+
     }
 
     private void newGame() {
+        //ADD HIDDEN TREASURE HERE, MAKE CONSTANT VARIABLE
 
         int cell;
 
         var random = new Random();
         inGame = true;
         minesLeft = N_MINES;
+        extraLives = 0;
 
         allCells = N_ROWS * N_COLS;
         field = new int[allCells];
@@ -153,7 +190,14 @@ public class Board extends JPanel {
                 }
             }
         }
-    }
+
+ int treasurePosition = (int) (allCells * random.nextDouble()); //THIS HIDES THE pppCELL TESTING EXTRA LIFE
+ while (field[treasurePosition] == COVERED_MINE_CELL) {
+      treasurePosition = (int) (allCells * random.nextDouble());
+ }
+ field[treasurePosition] = TREASURE_CELL + COVER_FOR_CELL;  // Treasure is hidden but marked
+    
+}
 
     private void find_empty_cells(int j) {
 
@@ -248,6 +292,20 @@ public class Board extends JPanel {
 
     @Override
     public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        
+        if (isPaused) {
+            // Draw pause screen
+            g.drawImage(pauseImage, 
+                   0, 0,                // X,Y position (top-left corner)
+                   BOARD_WIDTH,         // Width to stretch to
+                   BOARD_HEIGHT,        // Height to stretch to
+                   this);
+            return; // Skip the rest of painting while paused
+        }
+
+        //ADD PAUSED PLAY SCREEN HERE
 
         int uncover = 0;
 
@@ -257,11 +315,17 @@ public class Board extends JPanel {
 
                 int cell = field[(i * N_COLS) + j];
 
-                if (inGame && cell == MINE_CELL) {
-
-                    inGame = false;
+               
+                    //ADD OPTION FOR TREASURE HERE, IF TREASURE FOUND IN GAME != FALSE.
+                    //Special message pops up that says you found treasure + 1 life. When bomb found message goes away
+                
+                if (inGame && cell == TREASURE_CELL) {
+                    g.drawImage(img[13], (j * CELL_SIZE), (i * CELL_SIZE), this); // Assuming treasure is image 13
                 }
+    
 
+              
+                
                 if (!inGame) {
 
                     if (cell == COVERED_MINE_CELL) {
@@ -287,6 +351,7 @@ public class Board extends JPanel {
                 g.drawImage(img[cell], (j * CELL_SIZE),
                         (i * CELL_SIZE), this);
             }
+            
         }
 
         if (uncover == 0 && inGame) {
@@ -295,6 +360,7 @@ public class Board extends JPanel {
             statusbar.setText("Game won");
 
         } else if (!inGame) {
+
             statusbar.setText("Game lost");
         }
     }
@@ -303,7 +369,10 @@ public class Board extends JPanel {
 
         @Override
         public void mousePressed(MouseEvent e) {
+            if(isPaused){return
+            ;}
 
+            
             int x = e.getX();
             int y = e.getY();
 
@@ -351,27 +420,44 @@ public class Board extends JPanel {
 
                         return;
                     }
-
-                    if ((field[(cRow * N_COLS) + cCol] > MINE_CELL)
-                            && (field[(cRow * N_COLS) + cCol] < MARKED_MINE_CELL)) {
-
+                    
+                    if (field[(cRow * N_COLS) + cCol] == TREASURE_CELL) {
+                        extraLives++;
+                        field[(cRow * N_COLS) + cCol] = EMPTY_CELL; // Uncover the cell
+                        statusbar.setText("Extra life found! Mines: " + minesLeft + " | Lives: " + extraLives);
+                        doRepaint = true;
+                        return;
+                    }
+                    if (field[(cRow * N_COLS) + cCol] == COVERED_MINE_CELL) {
+                        // Mine clicked
+                        if (extraLives > 0) {
+                            extraLives--;
+                            minesLeft--;
+                            field[(cRow * N_COLS) + cCol] = MINE_CELL; // Uncover the mine
+                            statusbar.setText("Used extra life! Mines: " + minesLeft + " | Lives: " + extraLives);
+                            doRepaint = true;
+                        } else {
+                            field[(cRow * N_COLS) + cCol] = MINE_CELL; // Uncover the mine
+                            inGame = false;
+                            statusbar.setText("Game over! Mines: " + minesLeft + " | Lives: " + extraLives);
+                            doRepaint = true;
+                        }
+                    } else if (field[(cRow * N_COLS) + cCol] > MINE_CELL && 
+                              field[(cRow * N_COLS) + cCol] < MARKED_MINE_CELL) {
+                        // Regular cell clicked
                         field[(cRow * N_COLS) + cCol] -= COVER_FOR_CELL;
                         doRepaint = true;
-
-                        if (field[(cRow * N_COLS) + cCol] == MINE_CELL) {
-                            inGame = false;
-                        }
 
                         if (field[(cRow * N_COLS) + cCol] == EMPTY_CELL) {
                             find_empty_cells((cRow * N_COLS) + cCol);
                         }
                     }
                 }
-
                 if (doRepaint) {
                     repaint();
                 }
             }
         }
     }
+    
 }
