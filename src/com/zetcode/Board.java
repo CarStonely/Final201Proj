@@ -404,11 +404,9 @@ public static final int EXPERT_MINES = 99;
 
         if (uncover == 0 && inGame) {
 
-            inGame = false;
             statusbar.setText("Game won");
 
         } else if (!inGame) {
-
             statusbar.setText("Game lost");
         }
     }
