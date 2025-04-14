@@ -5,43 +5,45 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-/**
- * Java Minesweeper Game
- *
- * Author: Jan Bodnar
- * Website: http://zetcode.com
- */
-
 public class Minesweeper extends JFrame {
 
     private JLabel statusbar;
 
+    // Default constructor (uses intermediate difficulty)
     public Minesweeper() {
-
-        initUI();
+        this(Board.INTERMEDIATE); // Default to intermediate
     }
 
-    private void initUI() {
+    // New constructor with difficulty parameter
+    public Minesweeper(int difficulty) {
+        initUI(difficulty);
+    }
 
+    private void initUI(int difficulty) {
         statusbar = new JLabel("");
         add(statusbar, BorderLayout.SOUTH);
-
-        add(new Board(statusbar));
+        
+        // Create board with selected difficulty
+        add(new Board(statusbar, difficulty));
 
         setResizable(false);
         pack();
-
         setTitle("Minesweeper");
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     public static void main(String[] args) {
-
-        EventQueue.invokeLater(() -> {
-
-            var ex = new Minesweeper();
-            ex.setVisible(true);
-        });
+        // Check if we should show difficulty selection
+        if (args.length > 0 && args[0].equals("--select-difficulty")) {
+            EventQueue.invokeLater(() -> {
+                new DifficultySelection().setVisible(true);
+            });
+        } else {
+            // Default behavior (direct launch with intermediate)
+            EventQueue.invokeLater(() -> {
+                new Minesweeper().setVisible(true);
+            });
+        }
     }
 }

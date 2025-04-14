@@ -16,6 +16,27 @@ import javax.swing.JPanel;
 
 public class Board extends JPanel {
 
+//Difficulty Settings
+
+public static final int BEGINNER = 0;
+public static final int INTERMEDIATE = 1;
+public static final int EXPERT = 2;
+
+
+
+public static final int BEGINNER_ROWS = 8;
+public static final int BEGINNER_COLS = 8;
+public static final int BEGINNER_MINES = 10;
+
+
+public static final int INTERMEDIATE_ROWS = 16;
+public static final int INTERMEDIATE_COLS = 16;
+public static final int INTERMEDIATE_MINES = 40;
+
+public static final int EXPERT_ROWS = 16;
+public static final int EXPERT_COLS = 30;
+public static final int EXPERT_MINES = 99;
+    
     private final int NUM_IMAGES = 13;
     private final int CELL_SIZE = 15;
 
@@ -31,12 +52,12 @@ public class Board extends JPanel {
     private final int DRAW_MARK = 11;
     private final int DRAW_WRONG_MARK = 12;
 
-    private final int N_MINES = 40;
-    private final int N_ROWS = 16;
-    private final int N_COLS = 16;
+    private  int N_MINES = 40;
+    private int N_ROWS = 16;
+    private  int N_COLS = 16;
 
-    private final int BOARD_WIDTH = N_COLS * CELL_SIZE + 1;
-    private final int BOARD_HEIGHT = N_ROWS * CELL_SIZE + 1;
+    private int BOARD_WIDTH = N_COLS * CELL_SIZE + 1;
+    private int BOARD_HEIGHT = N_ROWS * CELL_SIZE + 1;
 
     private final int TREASURE_CELL = 8;
     private int extraLives = 0;
@@ -53,9 +74,37 @@ public class Board extends JPanel {
     private int allCells;
     private final JLabel statusbar;
 
-    public Board(JLabel statusbar) {
-
+    public Board(JLabel statusbar, int difficulty) {
         this.statusbar = statusbar;
+    
+
+        //Set Difficulty
+        switch (difficulty) {
+            case 0: // Beginner
+                N_ROWS = BEGINNER_ROWS;
+                N_COLS = BEGINNER_COLS;
+                N_MINES = BEGINNER_MINES;
+                break;
+            case 1: // Intermediate
+                N_ROWS = INTERMEDIATE_ROWS;
+                N_COLS = INTERMEDIATE_COLS;
+                N_MINES = INTERMEDIATE_MINES;
+                break;
+            case 2: // Expert
+                N_ROWS = EXPERT_ROWS;
+                N_COLS = EXPERT_COLS;
+                N_MINES = EXPERT_MINES;
+                break;
+            default: // Default to intermediate
+                N_ROWS = INTERMEDIATE_ROWS;
+                N_COLS = INTERMEDIATE_COLS;
+                N_MINES = INTERMEDIATE_MINES;
+           
+        }
+        
+        BOARD_WIDTH = N_COLS * CELL_SIZE + 1;
+        BOARD_HEIGHT = N_ROWS * CELL_SIZE + 1;
+        
         initBoard();
     }
 
