@@ -1,4 +1,3 @@
-
 // GUIView.java
 package minesweeper;
 
@@ -71,7 +70,7 @@ public class GUIView extends JFrame implements IView {
                     for (int c = 0; c < model.getCols(); c++) {
                         Cell cell = model.getGrid()[r][c];
                         int code;
-                        if (!cell.isRevealed()) code = cell.isFlagged() ? 11 : 0;
+                        if (!cell.isRevealed()) code = cell.isFlagged() ? 11 : 10;
                         else if (cell.isMine()) code = 9;
                         else if (cell.hasTreasure()) code = 13;
                         else code = cell.getAdjMines();
