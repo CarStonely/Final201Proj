@@ -225,7 +225,7 @@ public class BoardModel {
      */
     public int codeForCell(int r, int c) {
         Cell cell = grid[r][c];
-
+        // Unrevealed cells are either flagged or hidden mines
         if (cell.isFlagged()) {
             return cell.isMine() ? 12 : 11;
         }
@@ -274,16 +274,18 @@ public class BoardModel {
                 model.grid[r][c] = new Cell();
             }
         }
-
         // Place exactly according to the 0/1/2 spec
+        // Iterate through each cell in the 8x8 grid
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 8; c++) {
-                int v = cells[r][c];
-                if (v == 1) {
-                    model.grid[r][c].setMine(true);
-                } else if (v == 2) {
-                    model.grid[r][c].setTreasure(true);
-                }
+            int v = cells[r][c]; // Get the value from the input configuration
+            if (v == 1) {
+                // If the value is 1, set the cell as a mine
+                model.grid[r][c].setMine(true);
+            } else if (v == 2) {
+                // If the value is 2, set the cell as a treasure
+                model.grid[r][c].setTreasure(true);
+            }
             }
         }
 

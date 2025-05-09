@@ -9,6 +9,14 @@ public class GameController {
         this.view = view;
     }
 
+    /**
+     * Starts the Minesweeper game loop. The game continues until the player either
+     * wins by revealing all non-mine cells or loses by revealing a mine. During
+     * each iteration of the loop, the current game state is displayed, and the
+     * player is prompted to make a move. The move can either reveal a cell or mark
+     * a cell as containing a mine. At the end of the game, a message is displayed
+     * indicating whether the player won or lost.
+     */
     public void startGame() {
         while (!model.isGameOver() && !model.isGameWon()) {
             view.display(model);

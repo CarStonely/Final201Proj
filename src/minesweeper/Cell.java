@@ -1,5 +1,11 @@
 package minesweeper;
 
+/**
+ * The Cell class represents a single cell in a Minesweeper game grid.
+ * It contains information about the cell's state, such as whether it contains
+ * a mine, is flagged, has treasure, or is revealed, as well as the number of
+ * adjacent mines.
+ */
 public class Cell {
     private int adjMines;
     private boolean isMine;
